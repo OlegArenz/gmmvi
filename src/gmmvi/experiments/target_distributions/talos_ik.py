@@ -19,6 +19,9 @@ class Talos(LNPDF):
     by a mixture of experts, that penalize the task space error of the left endeffector, joint-limit violations,
     unstable configurations, etc.
 
+    This class requires a fork of tf_robot_learning that can be found
+    `here <https://github.com/OlegArenz/tf_robot_learning>`_.
+
     Parameters:
         context: list[float]
             A list of three floats, specifying the desired x, y, z coordinates of the left endeffector.
