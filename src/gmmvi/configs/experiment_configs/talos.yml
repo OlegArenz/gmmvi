@@ -1,0 +1,28 @@
+start_seed: 10000
+
+environment_name: "Talos"
+environment_config:
+    context: [0.1, 0.5, 1.]
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 1
+    prior_mean: 0.
+    prior_scale: 1.
+    initial_cov: 1.
+
+gmmvi_runner_config:
+    log_metrics_interval: 500
+
+use_sample_database: True
+max_database_size: 500000
+temperature: 1.
+
+
+
+
+
+
+
+
+

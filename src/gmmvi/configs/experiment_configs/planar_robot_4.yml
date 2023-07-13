@@ -1,0 +1,31 @@
+start_seed: 10000
+
+environment_name: "PlanarRobot4"
+environment_config: {}
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 300
+    prior_mean: 0.
+    prior_scale: [1., 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+    initial_cov: [0.0625, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025]
+
+gmmvi_runner_config:
+    log_metrics_interval: 10
+
+# mmd_evaluation_config:
+#   alpha: 6.
+#   sample_dir: "experiments/target_distributions/tests/planar10_4p_10kOf20M_samples.npy"
+
+use_sample_database: True
+max_database_size: 10000000
+temperature: 1.
+
+
+
+
+
+
+
+
+

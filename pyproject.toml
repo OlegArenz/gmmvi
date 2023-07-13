@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gmmvi"
+description = "A library for learning Gaussian mixture models for variational inference"
+authors = [
+  {email = "oleg@holistic-robotics.de"},
+  {name = "Oleg Arenz"}
+]
+readme = "README.rst"
+requires-python = ">=3.7"
+keywords = ["variational inference", "machine learning"]
+license = {text = "MIT"}
+dynamic = ["version"]
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+dependencies = [
+    "cw2>=2.0.0",
+    "matplotlib>=3.3.4",
+    "numpy>=1.22.3",
+    "PyYAML>=6.0",
+    "tensorflow>=2.12.0",
+    "tensorflow-datasets>=4.6.0",
+    "tensorflow-probability>=0.12.1",
+    "wandb>=0.12.9",
+    "mergedeep",
+    "plotly>=5.11"
+]
+
+[project.optional-dependencies]
+doc = [
+  "sphinx==5.3.0",
+  "sphinx_rtd_theme==0.2.5b2",
+  "sphinxcontrib-bibtex>=2.5.0"
+]
+
+# Should be installed manually, after installing gmmvi
+#talos = [
+#  "tf_robot_learning @ git+ssh://git@github.com/OlegArenz/tf_robot_learning"
+#]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools_scm]
+write_to = "_version.py"

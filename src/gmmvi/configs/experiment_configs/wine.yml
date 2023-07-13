@@ -1,0 +1,22 @@
+start_seed: 10000
+
+environment_name: "WINE"
+environment_config:
+    likelihood_scaling: 1.
+    prior_std: 1.
+    batch_size: 128
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 4
+    prior_mean: 0.
+    prior_scale: 1.
+    initial_cov: 1.
+
+gmmvi_runner_config:
+    log_metrics_interval: 25
+
+use_sample_database: True
+max_database_size: 500000
+temperature: 1.
+

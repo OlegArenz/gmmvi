@@ -1,0 +1,21 @@
+start_seed: 10000
+
+environment_name: "GMM"
+environment_config:
+    num_dimensions: 20
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 1
+    prior_mean: 0.
+    prior_scale: 31.63
+    initial_cov: 1000.
+
+gmmvi_runner_config:
+    log_metrics_interval: 100
+
+use_sample_database: True
+max_database_size: 10000000
+temperature: 1.
+
+

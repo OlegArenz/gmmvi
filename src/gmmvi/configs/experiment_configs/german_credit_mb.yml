@@ -1,0 +1,27 @@
+start_seed: 10000
+
+environment_name: "GermanCredit_mb"
+environment_config:
+    batch_size: 64
+    size_test_set: 0
+    use_own_batch_per_sample: True
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 1
+    prior_mean: 0.
+    prior_scale: 10.
+    initial_cov: 100.
+
+gmmvi_runner_config:
+    log_metrics_interval: 20
+
+#  mmd_evaluation_config:
+#    alpha: 20.
+#    sample_dir: "/home/oleg/src/gmmvi_test/src/gmmvi/experiments/target_distributions/tests/german_credit10k.npy"
+
+use_sample_database: True
+max_database_size: 10000000
+temperature: 1.
+
+

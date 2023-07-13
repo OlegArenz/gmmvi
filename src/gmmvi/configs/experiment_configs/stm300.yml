@@ -1,0 +1,21 @@
+start_seed: 10000
+
+environment_name: "STM"
+environment_config:
+    num_dimensions: 300
+    harder_setting: True
+    use_matlab_target: False
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 20
+    prior_mean: 0.
+    prior_scale: 100.
+    initial_cov: 300.
+
+gmmvi_runner_config:
+    log_metrics_interval: 50
+
+use_sample_database: True
+max_database_size: 100000
+temperature: 1.

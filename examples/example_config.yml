@@ -1,0 +1,66 @@
+# This is an example config file that can be used for creating a GMMVI object using GMMVI.build_from_config()
+# Here we use the design choices corresponding to the Codeword "SAMTRON"
+#  (see docs/build/html/about.html#naming-convention if you don't know what this means)
+# Default parameters for each design choice can be found under gmmvi/configs/module_configs
+
+start_seed: 10000
+use_sample_database: True
+max_database_size: 10000000
+temperature: 1.
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 1
+    prior_mean: 0.
+    prior_scale: 10.
+    initial_cov: 100.
+
+ng_estimator_type: "Stein" # Codeletter "S"
+ng_estimator_config:
+  only_use_own_samples: False
+  use_self_normalized_importance_weights: True
+
+num_component_adapter_type: "adaptive" # Codeletter "A"
+num_component_adapter_config:
+  del_iters: 100
+  add_iters: 25
+  max_components: 1000
+  thresholds_for_add_heuristic: [ 5000., 1000.0, 500.0, 200.0, 100.0, 50.0 ]
+  min_weight_for_del_heuristic: 1.0e-6
+  num_database_samples: 100000
+  num_prior_samples: 0
+
+sample_selector_type: "component-based" # Codeletter "M"
+sample_selector_config:
+  desired_samples_per_component: 250
+  ratio_reused_samples_to_desired: 0.
+
+ng_based_updater_type: "trust-region" # Codeletter "T"
+ng_based_updater_config: {}
+
+component_stepsize_adapter_type: "improvement-based" # Codeletter "R"
+component_stepsize_adapter_config:
+  initial_stepsize: 1.
+  min_stepsize: 0.001
+  max_stepsize: 1.
+  stepsize_inc_factor: 1.15
+  stepsize_dec_factor: 0.85
+
+weight_stepsize_adapter_type: "improvement_based" # Codeletter "O"
+weight_stepsize_adapter_config:
+  initial_stepsize: 1.
+  min_stepsize: 0.0001
+  max_stepsize: 1.
+  stepsize_inc_factor: 1.15
+  stepsize_dec_factor: 0.85
+
+weight_updater_type: "trust-region" # Codeletter "N"
+weight_updater_config:
+  use_self_normalized_importance_weights: True
+
+# The remaining settings are only needed when using the GmmviRunner
+gmmvi_runner_config:
+    log_metrics_interval: 50
+
+environment_name: "breastCancer"
+environment_config: {}

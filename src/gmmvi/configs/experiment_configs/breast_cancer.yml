@@ -1,0 +1,24 @@
+start_seed: 10000
+
+environment_name: "breastCancer"
+environment_config: {}
+
+model_initialization:
+    use_diagonal_covs: False
+    num_initial_components: 1
+    prior_mean: 0.
+    prior_scale: 10.
+    initial_cov: 100.
+
+gmmvi_runner_config:
+    log_metrics_interval: 50
+
+#  mmd_evaluation_config:
+#    alpha: 20.
+#    sample_dir: "experiments/target_distributions/tests/breastcancer_gt_10k.npy"
+
+use_sample_database: True
+max_database_size: 10000000
+temperature: 1.
+
+
