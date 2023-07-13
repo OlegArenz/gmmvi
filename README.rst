@@ -1,4 +1,5 @@
 GMMVI: Gaussian Mixture Model Variational Inference
 ===================================================
 
-The documentation is provided as `html <docs/build/html/index.html>`_ or `pdf <docs/build/latex/gmmvi.pdf>`_.
+A framework for optimizing Gaussian mixture models for variational inference.
+Please refer to the `online documentation <https://gmmvi.rtfd.io>`_ for details.
