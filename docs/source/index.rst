@@ -9,7 +9,7 @@ check out the :doc:`about` page, for more details on the problem setting and the
 Just wanna know how do :ref:`install<installation>` and :ref:`use<usage>` the framework? :doc:`Get Started<get_started>`!
 
 For a look under the hood, you can check the :doc:`api` or directly dig into the source on the
-`Github page <https://github.com/OlegArenz/gmmvi_test>`_.
+`Github page <https://github.com/OlegArenz/gmmvi>`_.
 
 .. toctree::
    about

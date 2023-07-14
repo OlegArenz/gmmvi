@@ -15,6 +15,7 @@ build:
   jobs:
     post_install:
       - pip install .[doc]
+      - pip install git+https://github.com/OlegArenz/tf_robot_learning.git
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

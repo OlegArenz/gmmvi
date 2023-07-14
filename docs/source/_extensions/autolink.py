@@ -19,7 +19,7 @@ def get_github_rev():
 
 
 def setup(app):
-    baseurl = 'https://github.com/OlegArenz/gmmvi_test'
+    baseurl = 'https://github.com/OlegArenz/gmmvi'
     rev = get_github_rev()
     app.add_role('gitlink', autolink('{}/tree/{}/%s'.format(baseurl, rev)))
     app.add_role('example', autolink('{}/tree/{}/examples/%s'.format(baseurl, rev)))
