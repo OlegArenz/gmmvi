@@ -1,7 +1,10 @@
 About
 =====
 
-GMMVI (Gaussian Mixture Model Variational Inference) is a framework for optimizing a Gaussian mixture model
+GMMVI (Gaussian Mixture Model Variational Inference) is a framework for learning GMMS for variational inference,
+that was released along with the article :cite:p:`Arenz2023`.
+
+Formally, we aim to optimize a GMM
 :math:`q(\mathbf{x})` with Gaussian components :math:`q(\mathbf{x}|o)` and weights :math:`q(o)`,
 
 .. math::
@@ -30,8 +33,9 @@ performed to the categorical distribution over weights, :math:`q(o)`, and to eac
 However, both approaches differ quite significantly in several design choices (e.g. how the natural gradients are
 estimated) and derived the procedure from different perspectives with different theoretical guarantees, and therefore
 the equivalence of both approaches was initially not understand. This framework is published along with the article
-that first established the close connection between both approaches, and was used to systematically evaluate the
-effects of the different design choices.
+:cite:p:`Arenz2023` that first established the close connection between both approaches, and was used to systematically evaluate the
+effects of the different design choices. For reproducing these experiments, please refer to our
+`reproducibility package <https://github.com/OlegArenz/gmmvi-reproducibility>`_.
 
 .. _design choices:
 
