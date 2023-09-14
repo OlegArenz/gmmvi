@@ -38,11 +38,21 @@ environment_config = {
     "start_seed": 0,
     "environment_name": "Rosenbrock",
     "model_initialization": {
-        "use_diagonal_covs": False,
+        "use_diagonal_covs": True,
         "num_initial_components": 1,
         "prior_mean": 0.,
         "prior_scale": 1.,
         "initial_cov": 1.,
+    },
+    "ng_estimator_config": {
+        "only_use_own_samples": False,
+    },
+    "num_component_adapter_config": {
+        "add_iters": 5,
+        "del_iters": 100,
+    },
+    "sample_selector_config": {
+        "desired_samples_per_component": 5,
     },
     "gmmvi_runner_config": {
         "log_metrics_interval": 100
@@ -59,7 +69,7 @@ algorithm_config = get_default_algorithm_config("ZAMTRUX")
 merged_config = update_config(algorithm_config, environment_config)
 gmmvi_runner = GmmviRunner.build_from_config(merged_config)
 
-for n in range(500):
+for n in range(1000):
     gmmvi_runner.iterate_and_log(n)
 
 # Plot samples from our "Rosenbrock-distribution"

@@ -444,6 +444,15 @@ class KLConstrainedNgBasedComponentUpdater(NgBasedComponentUpdater):
             eta_offset = self.temperature
 
             reward_quad = expected_hessians_neg[i]
+
+            if tf.reduce_any(tf.math.is_nan(reward_quad)):
+                chols = chols.write(i, old_chol)
+                means = means.write(i, old_mean)
+                kls = kls.write(i, -1.)
+                successes = successes.write(i, False)
+                etas = etas.write(i, -1)
+                continue
+
             if self.model.diagonal_covs:
                 reward_lin = reward_quad * old_mean - expected_gradients_neg[i]
                 old_logdet = 2 * tf.reduce_sum(tf.math.log(old_chol))

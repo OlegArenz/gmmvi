@@ -73,6 +73,15 @@ class RegressionFunc:
             reg_mat = tf.tensor_scatter_nd_update(reg_mat, [[bias_index, bias_index]], [0])
         params = tf.squeeze(tf.linalg.solve(weighted_features @ features + reg_mat,
                                             weighted_features @ tf.expand_dims(outputs, 1)))
+        # Safer, but slower (how much?) ->
+        #
+        # chol = tf.linalg.cholesky(weighted_features @ features + reg_mat)
+        #
+        # if tf.reduce_any(tf.math.is_nan(chol)):
+        #     return tf.ones(tf.shape(features)[1]) * float('nan')
+        #
+        # params = tf.squeeze(tf.linalg.cholesky_solve(chol, weighted_features @ tf.expand_dims(outputs, 1)))
+
         return params
 
 
