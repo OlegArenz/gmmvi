@@ -109,11 +109,11 @@ class GMMVI:
         This static method provides a convenient way to create a :py:class:`GMMVI<gmmvi.optimization.gmmvi.GMMVI>`
         instance, based on an initial GMM ( a :py:class:`wrapped model<gmmvi.models.gmm_wrapper.GmmWrapper>` ),
         a :py:class:`target_distribution<gmmvi.experiments.target_distributions.lnpdf.LNPDF>` and a dictionary
-        containing the types and parameters of the :py:mod:`GMMVI modules<gmmvi.optimization.gmmvi_modules>`.
+        containing the types and parameters of the :ref:`modules <gmmvi-modules>`.
 
         Parameters:
             config: dict
-                The dictionary should contain for each :py:mod:`GMMVI module<gmmvi.optimization.gmmvi_modules>`
+                The dictionary should contain for each :ref:`GMMVI module <gmmvi-modules>`
                 an entry of the form XXX_type (a string) and XXX_config (a dict) for specifying the type of each module,
                 and the module-specific hyperparameters.
                 For example, the dictionary could contain sample_selector_type={"component-based"} and
