@@ -108,7 +108,7 @@ class QuadFunc(RegressionFunc):
         self.const_term = None
         self.num_quad_features = int(tf.floor(0.5 * (self.dim + 1) * self.dim))
         self.num_features = self.num_quad_features + self.dim + 1
-        self.triu_idx = tf.constant(tf.transpose(np.stack(np.where(np.triu(np.ones([dim, dim], np.bool))))))
+        self.triu_idx = tf.constant(tf.transpose(np.stack(np.where(np.triu(np.ones([dim, dim], bool))))))
 
     def _feature_fn(self, num_samples: int, x: tf.Tensor) -> tf.Tensor:
         linear_features = x
