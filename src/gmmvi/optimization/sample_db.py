@@ -23,14 +23,18 @@ class SampleDB:
         keep_samples: bool
             If this is False, the samples are not actually stored
 
+        use_gradient: bool
+            When set to false, the SampleDatabase will not store gradients.
+
         max_samples: int
             Maximal number of samples that are stored. If adding new samples would exceed this limit, every N-th sample
             in the database gets deleted.
     """
-    def __init__(self, dim, diagonal_covariances, keep_samples, max_samples=None):
+    def __init__(self, dim, diagonal_covariances, keep_samples, use_gradients: bool, max_samples=None):
         self._dim = dim
         self.diagonal_covariances = diagonal_covariances
         self.keep_samples = keep_samples
+        self.use_gradients = use_gradients
         self.samples = tf.Variable(tf.zeros((0, dim)), shape=[None, dim])
         self.means = tf.Variable(tf.zeros((0, dim)), shape=[None, dim])
         if diagonal_covariances:
@@ -56,9 +60,10 @@ class SampleDB:
             num_dimensions: int
                 dimensionality of the samples to be stored
         """
+        use_gradients = (config["ng_estimator_type"] == "Stein")
         return SampleDB(num_dimensions, config["model_initialization"]["use_diagonal_covs"],
-                             config["use_sample_database"],
-                             config["max_database_size"])
+                             config["use_sample_database"], use_gradients=use_gradients,
+                             max_samples=config["max_database_size"])
 
     @tf.function
     def remove_every_nth_sample(self, N: int):
@@ -70,7 +75,8 @@ class SampleDB:
         """
         self.samples.assign(self.samples[::N])
         self.target_lnpdfs.assign(self.target_lnpdfs[::N])
-        self.target_grads.assign(self.target_grads[::N])
+        if self.use_gradients:
+            self.target_grads.assign(self.target_grads[::N])
         self.mapping.assign(self.mapping[::N])
         used_indices, reduced_mapping = tf.unique(self.mapping)
         self.mapping.assign(reduced_mapping)
@@ -102,7 +108,7 @@ class SampleDB:
 
             target_grads: tf.Tensor
                 a two-dimensional tensor containing the gradients of the log-densities of the (unnormalized) target
-                distribution, :math:`\\nabla_{\\mathbf{x}} \\log p(\\mathbf{x})`.
+                distribution, :math:`\\nabla_{\\mathbf{x}} \\log p(\\mathbf{x})`. (Ignored if gradients are not stored).
 
             mapping: tf.Tensor
                 a tensor of size number_of_samples, which corresponds for every sample the index to *means* and *chols*
@@ -121,7 +127,8 @@ class SampleDB:
                 self.inv_chols.assign(tf.concat((self.inv_chols, tf.linalg.inv(chols)), axis=0))
             self.samples.assign(tf.concat((self.samples, samples), axis=0))
             self.target_lnpdfs.assign(tf.concat((self.target_lnpdfs, target_lnpdfs), axis=0))
-            self.target_grads.assign(tf.concat((self.target_grads, target_grads), axis=0))
+            if self.use_gradients:
+                self.target_grads.assign(tf.concat((self.target_grads, target_grads), axis=0))
         else:
             self.mapping.assign(mapping)
             self.means.assign(means)
@@ -132,7 +139,8 @@ class SampleDB:
                 self.inv_chols.assign(tf.linalg.inv(chols))
             self.samples.assign(samples)
             self.target_lnpdfs.assign(target_lnpdfs)
-            self.target_grads.assign(target_grads)
+            if self.use_gradients:
+                self.target_grads.assign(target_grads)
 
     def get_random_sample(self, N: int):
         """ Get N random samples from the database.
@@ -208,7 +216,7 @@ class SampleDB:
             **active_target_lnpdfs** - log-density evaluations of the target distribution for the selected samples
 
             **active_target_grads** - gradients evaluations of the log-density of the target distribution for the
-            selected samples
+            selected samples. Returns a vector of shape [0, num_dimensions] if gradients are not stored.
         """
         if tf.shape(self.samples)[0] == 0 or N == 0:
             return tf.zeros(0), tf.zeros((0, self._dim)), tf.zeros(0, dtype=tf.int32), tf.zeros(0), tf.zeros((0, self._dim))
@@ -216,7 +224,10 @@ class SampleDB:
             active_sample_index = tf.maximum(0, tf.shape(self.samples)[0] - N)
             active_sample = self.samples[active_sample_index:]
             active_target_lnpdfs = self.target_lnpdfs[active_sample_index:]
-            active_target_grads = self.target_grads[active_sample_index:]
+            if self.use_gradients:
+                active_target_grads = self.target_grads[active_sample_index:]
+            else:
+                active_target_grads = tf.zeros((0, self._dim))
             active_mapping = self.mapping[active_sample_index:]
             active_components, _, count = tf.unique_with_counts(active_mapping)
             means = tf.gather(self.means, active_components)

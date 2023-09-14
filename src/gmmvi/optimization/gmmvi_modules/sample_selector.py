@@ -26,12 +26,18 @@ class SampleSelector:
 
         sample_db: :py:class:`SampleDB`
             The new samples and their target_densities (and gradients) are stored in the sample database.
+
+        use_gradient: bool
+            When set to false, the SampleSelector will not try to obtain the gradients of the target distribution,
+            which only works when using zero-order
+            methods for the :py:class:`NgEstimator<gmmvi.optimization.gmmvi_modules.ng_estimator.NgEstimator>`
     """
 
-    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB):
+    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB, use_gradient):
         self.target_distribution = target_distribution
         self.model = model
         self.sample_db = sample_db
+        self.use_gradient = use_gradient
         if self.target_distribution.safe_for_tf_graph:
             self.get_target_grads = tf.function(self.get_target_grads, experimental_relax_shapes=True)
 
@@ -54,10 +60,10 @@ class SampleSelector:
                 The target distribution is used for evaluating the newly drawn samples.
         """
         if config["sample_selector_type"] == "component-based":
-            return VipsSampleSelector(target_distribution, gmm_wrapper, sample_db,
+            return VipsSampleSelector(target_distribution, gmm_wrapper, sample_db, sample_db.use_gradients,
                                                  **config['sample_selector_config'])
         elif config["sample_selector_type"] == "mixture-based":
-            return LinSampleSelector(target_distribution, gmm_wrapper, sample_db,
+            return LinSampleSelector(target_distribution, gmm_wrapper, sample_db, sample_db.use_gradients,
                                                 **config['sample_selector_config'])
         else:
             raise ValueError(
@@ -67,6 +73,9 @@ class SampleSelector:
         return self.target_distribution.log_density(samples)
 
     def get_target_grads(self, samples: tf.Tensor) -> [tf.Tensor, tf.Tensor]:
+        if not self.use_gradient:
+            return None, self.target_uld(samples)
+
         if self.target_distribution.use_log_density_and_grad:
             # useful if we can't backprop through target_uld
             target, gradient = self.target_distribution.log_density_and_grad(samples)
@@ -121,6 +130,11 @@ class VipsSampleSelector(SampleSelector):
             The database is used for reusing samples from previous iterations and for storing the new samples and their
             target_densities (and gradients).
 
+        use_gradient: bool
+            When set to false, the SampleSelector will not try to obtain the gradients of the target distribution,
+            which only works when using zero-order
+            methods for the :py:class:`NgEstimator<gmmvi.optimization.gmmvi_modules.ng_estimator.NgEstimator>`
+
         desired_samples_per_component: int
             The desired number of samples for every component.
 
@@ -129,9 +143,9 @@ class VipsSampleSelector(SampleSelector):
             *desired_samples_per_component* freshest samples from the database.
     """
 
-    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB,
+    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB, use_gradient: bool,
                  desired_samples_per_component: int, ratio_reused_samples_to_desired: float):
-        super(VipsSampleSelector, self).__init__(target_distribution, model, sample_db)
+        super(VipsSampleSelector, self).__init__(target_distribution, model, sample_db, use_gradient)
         self.sample_db = sample_db
         self.desired_samples_per_component = desired_samples_per_component
         self.reused_samples_per_component = tf.cast(tf.math.floor(
@@ -240,6 +254,11 @@ class LinSampleSelector(SampleSelector):
             The database is used for reusing samples from previous iterations and for storing the new samples and their
             target_densities (and gradients).
 
+        use_gradient: bool
+            When set to false, the SampleSelector will not try to obtain the gradients of the target distribution,
+            which only works when using zero-order
+            methods for the :py:class:`NgEstimator<gmmvi.optimization.gmmvi_modules.ng_estimator.NgEstimator>`
+
         desired_samples_per_component: int
             The desired number for the mixture update.
 
@@ -248,9 +267,9 @@ class LinSampleSelector(SampleSelector):
             *desired_samples_per_component* freshest samples from the database.
     """
 
-    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB,
+    def __init__(self, target_distribution: LNPDF, model: GmmWrapper, sample_db: SampleDB, use_gradient: bool,
                  desired_samples_per_component: int, ratio_reused_samples_to_desired: float):
-        super(LinSampleSelector, self).__init__(target_distribution, model, sample_db)
+        super(LinSampleSelector, self).__init__(target_distribution, model, sample_db, use_gradient)
         self.desired_samples_per_component = desired_samples_per_component
         self.reused_samples_per_component = tf.cast(tf.math.floor(
             ratio_reused_samples_to_desired * desired_samples_per_component), dtype=tf.int32)
