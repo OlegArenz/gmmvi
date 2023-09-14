@@ -189,3 +189,96 @@ class QuadFunc(RegressionFunc):
             const_term += tf.reduce_sum(sample_mean * (-0.5 * t2 - t1))
 
         return quad_term, lin_term, const_term
+
+class QuadFunc_diag(RegressionFunc):
+    """ This class can be used to learn a function that is quadratic in the inputs
+    (or linear in the quadratic features).
+    The approximation takes the form: :math:`x^T R x + x^T r + r_0`, where
+    :math:`R` is a diagonal matrix.
+
+    Parameters:
+        dim: int
+            the dimension of x
+    """
+
+    def __init__(self, dim):
+        super().__init__(bias_entry=-1)
+        self.dim = dim
+        self.quad_term = None
+        self.lin_term = None
+        self.const_term = None
+        self.num_quad_features = int(self.dim)
+        self.num_features = self.num_quad_features + self.dim + 1
+
+    def _feature_fn(self, num_samples: int, x: tf.Tensor) -> tf.Tensor:
+        linear_features = x
+        constant_feature = tf.ones((len(x), 1))
+        quad_features = - 0.5 * x * x
+        features = tf.concat((quad_features, linear_features, constant_feature), axis=1)
+        return features
+
+    def fit_quadratic(self, regularizer: float, num_samples: int, inputs: tf.Tensor, outputs: tf.Tensor,
+                      weights: tf.Tensor = None, sample_mean: tf.Tensor = None, sample_chol_cov: tf.Tensor = None)\
+            -> [tf.Tensor, tf.Tensor, tf.Tensor]:
+        """
+        Fits the quadratic model.
+
+        Parameters:
+            regularizer: float
+                Coefficient for ridge regression
+
+            num_samples: int
+                Number of input samples (we could get this from *inputs*)
+
+            inputs: tf.Tensor
+                A two-dimensional tensor containing the inputs x.
+
+            outputs: tf.Tensor
+                A one-dimensional tensor containing the targets / dependant variables.
+
+            weights: tf.Tensor
+                (importance) weights used for weighted least-squares
+
+            sample_mean: tf.Tensor
+                Mean of the Gaussian distribution that sampled the input (used for whitening)
+
+            sample_chol_cov: tf.Tensor
+                diagonal elements of the Cholesky matrix of the Gaussian distribution that sampled the input (used for whitening)
+
+        Returns:
+            tuple(tf.Tensor, tf.Tensor, tf.Tensor):
+
+            **quad_term** - a vector containing the diagonal elements of :math:`R`
+
+            **lin_term** - the vector :math:`r`
+
+            **const_term** - the scalar bias
+
+        """
+
+        whitening = True
+        if sample_mean is None:
+            assert sample_chol_cov is None
+        if sample_chol_cov is None:
+            assert sample_mean is None
+
+      #  original_input = tf.constant(inputs)
+        # whitening
+        if whitening and sample_mean is not None and sample_chol_cov is not None:
+            inv_samples_chol_cov = 1. / sample_chol_cov
+            inputs = (inputs - sample_mean) * tf.transpose(inv_samples_chol_cov)
+
+        params = super().fit(regularizer, num_samples, inputs, outputs, weights)
+
+        quad_term = params[:self.dim]
+        lin_term = params[self.dim:-1]
+        const_term = params[-1]
+
+        # unwhitening:
+        if whitening and sample_mean is not None and sample_chol_cov is not None:
+            quad_term = inv_samples_chol_cov * quad_term * inv_samples_chol_cov
+            t1 = inv_samples_chol_cov * lin_term
+            t2 = quad_term * sample_mean
+            lin_term = t1 + t2
+            const_term += tf.reduce_sum(sample_mean * (-0.5 * t2 - t1))
+        return quad_term, lin_term, const_term

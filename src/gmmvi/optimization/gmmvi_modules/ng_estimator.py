@@ -3,9 +3,8 @@ from typing import Tuple
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from gmmvi.optimization.least_squares import QuadFunc
+from gmmvi.optimization.least_squares import QuadFunc, QuadFunc_diag
 from gmmvi.models.gmm_wrapper import GmmWrapper
-
 
 class NgEstimator:
     """ This class provides a common interface for estimating the natural gradient for a Gaussian component.
@@ -291,7 +290,10 @@ class MoreNgEstimator(NgEstimator):
         super(MoreNgEstimator, self).__init__(temperature, model, True, only_use_own_samples,
                                               use_self_normalized_importance_weights)
         tf.assert_equal(self._model.l2_regularizers, initial_l2_regularizer)
-        self.least_square_fitter = QuadFunc(self._model.num_dimensions)
+        if self._model.diagonal_covs:
+            self.least_square_fitter = QuadFunc_diag(self._model.num_dimensions)
+        else:
+            self.least_square_fitter = QuadFunc(self._model.num_dimensions)
 
     def get_expected_hessian_and_grad(self, samples: tf.Tensor, mapping: tf.Tensor, background_densities: tf.Tensor,
                                       target_lnpdfs: tf.Tensor, target_lnpdfs_grads: tf.Tensor) \
@@ -368,8 +370,11 @@ class MoreNgEstimator(NgEstimator):
 
             this_G_hat = reward_quad
             expected_hessian_neg = expected_hessian_neg.write(i, this_G_hat)
-            this_g_hat = tf.reshape(reward_quad @ tf.expand_dims(self._model.means[i], axis=1)
-                                    - tf.expand_dims(reward_lin, axis=1), [self._model.num_dimensions])
+            if self._model.diagonal_covs:
+                this_g_hat = reward_quad * self._model.means[i] - reward_lin
+            else:
+                this_g_hat = tf.reshape(reward_quad @ tf.expand_dims(self._model.means[i], axis=1)
+                                        - tf.expand_dims(reward_lin, axis=1), [self._model.num_dimensions])
             expected_gradient_neg = expected_gradient_neg.write(i, this_g_hat)
         expected_hessian_neg = tf.convert_to_tensor(expected_hessian_neg.stack())
         expected_gradient_neg = tf.convert_to_tensor(expected_gradient_neg.stack())
